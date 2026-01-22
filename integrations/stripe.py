@@ -4,9 +4,17 @@ import stripe
 import os
 from utils.retry_logic import retry
 from utils.error_handlers import ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Set your secret key from environment variable
-stripe.api_key = os.environ.get('STRIPE_API_KEY', 'your_secret_key')
+stripe_api_key = os.environ.get('STRIPE_API_KEY')
+if not stripe_api_key:
+    logger.warning("STRIPE_API_KEY environment variable not set. Stripe integration will not work.")
+    stripe_api_key = None
+else:
+    stripe.api_key = stripe_api_key
 
 
 class StripeService:

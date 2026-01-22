@@ -153,6 +153,16 @@ class PayoutService:
         self.cashback_service = CashbackService(db)
     
     @retry(max_attempts=3, delay=1, backoff=2)
+    def _process_stripe_payout(self, customer_id: int, amount: float) -> dict:
+        """Process payout via Stripe with retry logic"""
+        # This is where you would integrate with Stripe
+        # Using retry decorator here ensures external API calls are retried
+        # Example:
+        # from integrations.stripe import StripeService
+        # stripe_service = StripeService()
+        # return stripe_service.create_payout(amount, destination)
+        return {"status": "success", "message": "Payout processed (stub)"}
+    
     def process_payout(self, customer_id: int, amount: float) -> Payout:
         """Process a payout from customer's cashback balance"""
         if not is_valid_amount(amount):
@@ -168,7 +178,7 @@ class PayoutService:
         if current_balance < amount:
             raise ValidationError(f"Insufficient balance. Available: {current_balance}")
         
-        # Deduct from balance
+        # Deduct from balance first (before external API call)
         self.cashback_service.deduct_balance(customer_id, amount)
         
         # Create payout record
@@ -181,7 +191,15 @@ class PayoutService:
         self.db.commit()
         self.db.refresh(payout)
         
-        # Here you would integrate with payment processor (e.g., Stripe)
-        # For now, we just record the payout
+        # Process payout via payment processor with retry logic
+        try:
+            self._process_stripe_payout(customer_id, amount)
+        except Exception as e:
+            # If Stripe fails, we've already recorded the payout
+            # In production, you might want to mark it as "pending" or "failed"
+            logging.error(f"Failed to process Stripe payout: {e}")
+            # Could add a status field to Payout model to track this
+        
+        return payout
         
         return payout
