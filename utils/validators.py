@@ -1,15 +1,27 @@
-def validate_email(email):
-    import re
-    pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+import re
+
+# Email validation function
+
+def is_valid_email(email):
+    pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
     return re.match(pattern, email) is not None
 
+# Phone validation function
 
-def validate_phone_number(phone):
-    pattern = r'^\+?[1-9]\d{1,14}$'
+def is_valid_phone(phone):
+    pattern = r'^\+?1?\d{9,15}$'
     return re.match(pattern, phone) is not None
 
+# Amount validation function
 
-def validate_username(username):
-    pattern = r'^[a-zA-Z0-9_.-]{3,20}$'
-    return re.match(pattern, username) is not None
+def is_valid_amount(amount):
+    try:
+        amount = float(amount)
+        return amount >= 0
+    except ValueError:
+        return False
 
+# Customer validation function
+
+def is_valid_customer(customer):
+    return isinstance(customer, dict) and 'name' in customer and 'email' in customer and is_valid_email(customer['email'])
