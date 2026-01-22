@@ -1,1 +1,79 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime\nfrom sqlalchemy.orm import relationship\nfrom database import Base\n\nclass Ambassador(Base):\n    __tablename__ = 'ambassadors'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    email = Column(String, unique=True, nullable=False)\n    group_id = Column(Integer, ForeignKey('groups.id'))\n    group = relationship('Group', back_populates='ambassadors')\n\nclass Customer(Base):\n    __tablename__ = 'customers'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    email = Column(String, unique=True, nullable=False)\n\nclass Group(Base):\n    __tablename__ = 'groups'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    ambassadors = relationship('Ambassador', back_populates='group')\n\nclass QRCode(Base):\n    __tablename__ = 'qr_codes'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    code = Column(String, unique=True, nullable=False)\n    ambassador_id = Column(Integer, ForeignKey('ambassadors.id'))\n    ambassador = relationship('Ambassador', back_populates='qr_codes')\n\nclass CashbackBalance(Base):\n    __tablename__ = 'cashback_balances'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customers.id'))\n    balance = Column(Float, default=0)\n    customer = relationship('Customer')\n\nclass GiftCard(Base):\n    __tablename__ = 'gift_cards'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    code = Column(String, unique=True, nullable=False)\n    value = Column(Float, nullable=False)\n\nclass Transaction(Base):\n    __tablename__ = 'transactions'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customers.id'))\n    amount = Column(Float, nullable=False)\n    date = Column(DateTime, nullable=False)\n    customer = relationship('Customer')\n\nclass CashbackTransfer(Base):\n    __tablename__ = 'cashback_transfers'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    from_customer_id = Column(Integer, ForeignKey('customers.id'))\n    to_customer_id = Column(Integer, ForeignKey('customers.id'))\n    amount = Column(Float, nullable=False)\n    date = Column(DateTime, nullable=False)\n    from_customer = relationship('Customer', foreign_keys=[from_customer_id])\n    to_customer = relationship('Customer', foreign_keys=[to_customer_id])\n\nclass Payout(Base):\n    __tablename__ = 'payouts'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    customer_id = Column(Integer, ForeignKey('customers.id'))\n    amount = Column(Float, nullable=False)\n    date = Column(DateTime, nullable=False)\n    customer = relationship('Customer')
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
+from sqlalchemy.orm import relationship
+from database import Base
+
+class Ambassador(Base):
+    __tablename__ = 'ambassadors'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    group_id = Column(Integer, ForeignKey('groups.id'))
+    group = relationship('Group', back_populates='ambassadors')
+    qr_codes = relationship('QRCode', back_populates='ambassador')
+
+class Customer(Base):
+    __tablename__ = 'customers'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+
+class Group(Base):
+    __tablename__ = 'groups'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    ambassadors = relationship('Ambassador', back_populates='group')
+
+class QRCode(Base):
+    __tablename__ = 'qr_codes'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String, unique=True, nullable=False)
+    ambassador_id = Column(Integer, ForeignKey('ambassadors.id'))
+    ambassador = relationship('Ambassador', back_populates='qr_codes')
+
+class CashbackBalance(Base):
+    __tablename__ = 'cashback_balances'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_id = Column(Integer, ForeignKey('customers.id'))
+    balance = Column(Float, default=0)
+    customer = relationship('Customer')
+
+class GiftCard(Base):
+    __tablename__ = 'gift_cards'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String, unique=True, nullable=False)
+    value = Column(Float, nullable=False)
+
+class Transaction(Base):
+    __tablename__ = 'transactions'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_id = Column(Integer, ForeignKey('customers.id'))
+    amount = Column(Float, nullable=False)
+    date = Column(DateTime, nullable=False)
+    customer = relationship('Customer')
+
+class CashbackTransfer(Base):
+    __tablename__ = 'cashback_transfers'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    from_customer_id = Column(Integer, ForeignKey('customers.id'))
+    to_customer_id = Column(Integer, ForeignKey('customers.id'))
+    amount = Column(Float, nullable=False)
+    date = Column(DateTime, nullable=False)
+    from_customer = relationship('Customer', foreign_keys=[from_customer_id])
+    to_customer = relationship('Customer', foreign_keys=[to_customer_id])
+
+class Payout(Base):
+    __tablename__ = 'payouts'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_id = Column(Integer, ForeignKey('customers.id'))
+    amount = Column(Float, nullable=False)
+    date = Column(DateTime, nullable=False)
+    customer = relationship('Customer')
