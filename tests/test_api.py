@@ -185,7 +185,9 @@ def test_payout_insufficient_balance(test_client):
         "amount": 100.0
     }
     response = test_client.post("/payouts/", json=payout_data)
-    assert response.status_code == 500  # Should fail
+    # Should fail with validation error (400)
+    assert response.status_code == 400
+    assert "Insufficient balance" in response.json()["message"]
 
 
 def test_create_ambassador(test_client):

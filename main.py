@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
 import uvicorn
@@ -22,6 +23,7 @@ from schemas import (
 )
 from services import CashbackService, TransactionService, PayoutService
 from logging_config import setup_logging
+from utils.error_handlers import NotFoundError, ValidationError
 
 # Initialize logger
 logger = setup_logging()
@@ -45,6 +47,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Exception handlers
+@app.exception_handler(NotFoundError)
+async def not_found_error_handler(request, exc: NotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Not Found", "message": exc.message}
+    )
+
+
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request, exc: ValidationError):
+    return JSONResponse(
+        status_code=400,
+        content={"error": "Validation Error", "message": exc.message}
+    )
+
 # Health check endpoint
 @app.get("/", tags=["Health"])
 async def root():
@@ -58,7 +77,7 @@ async def create_ambassador(ambassador: AmbassadorCreate, db: Session = Depends(
     if db_ambassador:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    new_ambassador = Ambassador(**ambassador.dict())
+    new_ambassador = Ambassador(**ambassador.model_dump())
     db.add(new_ambassador)
     db.commit()
     db.refresh(new_ambassador)
@@ -87,7 +106,7 @@ async def create_customer(customer: CustomerCreate, db: Session = Depends(get_db
     if db_customer:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    new_customer = Customer(**customer.dict())
+    new_customer = Customer(**customer.model_dump())
     db.add(new_customer)
     db.commit()
     db.refresh(new_customer)
@@ -125,7 +144,7 @@ async def get_customer_balance(customer_id: int, db: Session = Depends(get_db)):
 @app.post("/groups/", response_model=GroupResponse, tags=["Groups"])
 async def create_group(group: GroupCreate, db: Session = Depends(get_db)):
     """Create a new group"""
-    new_group = Group(**group.dict())
+    new_group = Group(**group.model_dump())
     db.add(new_group)
     db.commit()
     db.refresh(new_group)
@@ -147,7 +166,7 @@ async def create_qrcode(qrcode: QRCodeCreate, db: Session = Depends(get_db)):
     if not ambassador:
         raise HTTPException(status_code=404, detail="Ambassador not found")
     
-    new_qrcode = QRCode(**qrcode.dict())
+    new_qrcode = QRCode(**qrcode.model_dump())
     db.add(new_qrcode)
     db.commit()
     db.refresh(new_qrcode)
@@ -237,7 +256,7 @@ async def get_customer_payouts(customer_id: int, skip: int = 0, limit: int = 100
 @app.post("/gift-cards/", response_model=GiftCardResponse, tags=["Gift Cards"])
 async def create_gift_card(gift_card: GiftCardCreate, db: Session = Depends(get_db)):
     """Create a new gift card"""
-    new_gift_card = GiftCard(**gift_card.dict())
+    new_gift_card = GiftCard(**gift_card.model_dump())
     db.add(new_gift_card)
     db.commit()
     db.refresh(new_gift_card)

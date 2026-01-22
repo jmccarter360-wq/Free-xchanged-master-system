@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -16,9 +16,8 @@ class AmbassadorCreate(AmbassadorBase):
 class AmbassadorResponse(AmbassadorBase):
     id: int
     group_id: Optional[int] = None
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Customer schemas
@@ -33,9 +32,8 @@ class CustomerCreate(CustomerBase):
 
 class CustomerResponse(CustomerBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Group schemas
@@ -49,9 +47,8 @@ class GroupCreate(GroupBase):
 
 class GroupResponse(GroupBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # QRCode schemas
@@ -66,9 +63,8 @@ class QRCodeCreate(QRCodeBase):
 class QRCodeResponse(QRCodeBase):
     id: int
     ambassador_id: int
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Transaction schemas
@@ -84,9 +80,8 @@ class TransactionResponse(TransactionBase):
     id: int
     customer_id: int
     date: datetime
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # CashbackTransfer schemas
@@ -104,9 +99,8 @@ class CashbackTransferResponse(CashbackTransferBase):
     from_customer_id: int
     to_customer_id: int
     date: datetime
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Payout schemas
@@ -122,9 +116,8 @@ class PayoutResponse(PayoutBase):
     id: int
     customer_id: int
     date: datetime
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # GiftCard schemas
@@ -139,15 +132,13 @@ class GiftCardCreate(GiftCardBase):
 
 class GiftCardResponse(GiftCardBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 # CashbackBalance schemas
 class CashbackBalanceResponse(BaseModel):
     customer_id: int
     balance: float
-
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
